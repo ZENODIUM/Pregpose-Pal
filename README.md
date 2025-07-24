@@ -1,4 +1,5 @@
 # PregPose Pal
+![WhatsApp Image 2025-07-24 at 23 30 09_a0ee4a6e](https://github.com/user-attachments/assets/06b6c220-b9c4-40a2-a8e5-3bad8c45562b)
 
 ## Overview
 PregPose Pal is a web-based platform designed to help pregnant women monitor and improve their posture and movement safety using only their mobile phone sensors. The system enables users to record their own movement data, train custom machine learning models, and receive real-time feedback and visualizations to help prevent falls and discomfort during pregnancy.
@@ -13,6 +14,12 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
 - **Chart.js**: Frontend JavaScript library for animated, interactive charts
 - **HTML/CSS/JS**: Responsive, modern user interface
 - **Sensor Logger App**: Third-party mobile app for streaming accelerometer and gyroscope data to the server
+
+## Sensor logger app and configuration
+![WhatsApp Image 2025-07-24 at 22 11 54_e06ef0da](https://github.com/user-attachments/assets/bdc1ce51-1ce3-498a-8da6-d670cc572fe5)
+![WhatsApp Image 2025-07-24 at 22 12 04_eb8b1386](https://github.com/user-attachments/assets/40208c70-27b7-4a80-9480-daa1ec149275)
+
+
 
 ## Project Structure
 - `app.py`: Main Flask application (all backend logic)
@@ -45,6 +52,8 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
 
 ## Usage Guide
 ### 1. **Recording Data**
+![WhatsApp Image 2025-07-24 at 23 29 29_c43202d4](https://github.com/user-attachments/assets/7b01f5c6-a57e-416e-afbb-de4973d69d3c)
+
 - Go to the **Record** page.
 - Follow the on-screen instructions to set up the Sensor Logger app:
   - Download the app on your mobile device.
@@ -55,7 +64,13 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
 - Stop recording before switching to another pose.
 - Repeat for all poses you want to train.
 
+
+### Sensor Logger Config
+![WhatsApp Image 2025-07-24 at 23 17 44_7133b05b](https://github.com/user-attachments/assets/6a894ba3-1f92-4215-a271-feaf537656e1)
+
 ### 2. **Training a Model**
+![WhatsApp Image 2025-07-24 at 23 28 44_17a83485](https://github.com/user-attachments/assets/2cb7f4f4-fe3d-45ac-b56b-11e31f114c8f)
+
 - Go to the **Train** page.
 - Enter a model name and click "Train Model".
 - The system will use your recorded data to train a Random Forest classifier.
@@ -63,6 +78,8 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
 - Each model is saved and can be selected later for live prediction.
 
 ### 3. **Live Prediction**
+![WhatsApp Image 2025-07-24 at 23 26 05_58bbd25c](https://github.com/user-attachments/assets/4d992a31-7de6-4d01-9313-205ed2f5b633)
+
 - Go to the **Live Detection** page.
 - Change the Sensor Logger app's Push URL to `/predict_sensor` (e.g., `http://192.168.1.10:5000/predict_sensor`).
 - Select your trained model and start live prediction.
@@ -73,6 +90,10 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
   - A timeline of posture changes (downloadable as CSV)
   - Visual and vibration feedback for risky postures
 - You can adjust sensitivity for each posture class in real time.
+
+### Sensor Logger Config
+![WhatsApp Image 2025-07-24 at 22 13 02_1e8995d4](https://github.com/user-attachments/assets/35ee09f3-f988-4d97-a453-f697b79b6e1d)
+
 
 ## Pages Explained
 - **Landing Page**: Project overview, features, and quick start.
@@ -112,6 +133,7 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
 - You can add new poses by updating the POSES list in `app.py` and adding images to `static/`.
 - To use a different model (e.g., XGBoost, 1D CNN), update the training and prediction logic in `app.py`.
 - For more advanced features (user profiles, cloud storage, etc.), extend the Flask app and frontend as needed.
+- Implement Seperate Mobile App to record and process all data
 
 ## Data and Analysis
 - Personal sample data is available in the `labeled_data/` directory.
