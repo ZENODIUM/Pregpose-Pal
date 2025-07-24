@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block title %}PregPose Pal - Live Detection{% endblock %}
+{% block head %}
+<style>
+    .pose-btns { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; }
+    .pose-btn { padding: 0.7rem 1.5rem; border-radius: 2rem; border: none; background: var(--main-accent2); color: var(--main-light); font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: background 0.3s, color 0.3s, box-shadow 0.3s; box-shadow: 0 2px 8px #a259f733; }
+    .pose-btn.active { background: var(--main-accent); color: #fff; box-shadow: 0 2px 12px #a259f7cc; }
+    .history-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+    .history-table th, .history-table td { padding: 0.7rem 1.2rem; border-bottom: 1px solid #a259f733; }
+    .history-table th { background: var(--main-accent2); color: #fff; }
+    .history-table tr:nth-child(even) { background: rgba(255,255,255,0.04); }
+    .sensitivity-row { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; align-items: center; margin-bottom: 2rem; }
+    .sensitivity-group { display: flex; flex-direction: column; align-items: center; }
+    .sensitivity-label { font-size: 1rem; color: var(--main-light); margin-bottom: 0.3rem; }
+    .sensitivity-slider { width: 120px; accent-color: var(--main-accent); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="center card mb-2" style="max-width:700px; margin:0 auto; display:flex; flex-direction:column; align-items:center; padding:2.5rem 2rem;">
+    <h2 class="mb-1">Instructions for Live Prediction</h2>
+    <p style="font-size:1.1rem; color:var(--main-light);">
+        1. On your <b>mobile</b>, open the <b>Sensor Logger</b> app.<br>
+        2. Go to <b>Settings &gt; Data Streaming</b>.<br>
+        3. Turn on <b>HTTP Push</b>.<br>
+        4. In the <b>Push URL</b>, enter: <span class="highlight" style="font-size:1.1rem;">http://&lt;your-laptop-ip&gt;:5000/predict_sensor</span><br>
+        (Replace <i>&lt;your-laptop-ip&gt;</i> with your laptop's IP address on the same network.)
+    </p>
+</div>
+<h1 class="center mb-2">Live Pose Detection</h1>
+<form method="post" class="center mb-2 card">
+    <label for="model">Select Model:</label>
+    <select name="model" id="model" required style="margin:0 1rem; padding:0.5rem 1rem; border-radius:1rem; border:none;">
+        {% for m in models %}
+        <option value="{{ m }}" {% if selected_model == m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn">Start Live Prediction</button>
+</form>
+{% if error %}
+<p class="center" style="color:#ffb3ec; font-weight:600;">{{ error }}</p>
+{% endif %}
+{% if live %}
+<div class="center card mb-2">
+    <h2>Current Posture: <span class="highlight" id="current-posture">{{ prediction if prediction else 'None' }}</span></h2>
+    <div class="pose-btns">
+        {% for pose in poses %}
+        <button type="button" class="pose-btn{% if prediction == pose %} active{% endif %}" id="pose-btn-{{ pose }}">{{ pose.replace('_', ' ').title() }}</button>
+        {% endfor %}
+    </div>
+    <div class="sensitivity-row" id="sensitivity-row">
+        <!-- Sensitivity sliders will be rendered here by JS -->
+    </div>
+    <div class="flex-row">
+        <div class="chart-container w-100" style="flex:2; min-width:320px;">
+            <h3 class="center mb-1">Accelerometer (z, y, x)</h3>
+            <canvas id="accChart"></canvas>
+        </div>
+        <div class="chart-container w-100" style="flex:2; min-width:320px;">
+            <h3 class="center mb-1">Gyroscope (z, y, x)</h3>
+            <canvas id="gyroChart"></canvas>
+        </div>
+        <div class="chart-container w-100" style="flex:1; min-width:220px;">
+            <h3 class="center mb-1">Posture Distribution</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+    <div class="card mt-2">
+        <h3 class="center mb-1">Posture Change History</h3>
+        <table class="history-table" id="history-table">
+            <thead><tr><th>Date</th><th>Time</th><th>Posture</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <button class="download-btn" onclick="downloadHistory()">Download History as CSV</button>
+    </div>
+</div>
+<script>
+const poses = {{ poses|tojson }};
+let accData = {z:[], y:[], x:[], t:[]};
+let gyroData = {z:[], y:[], x:[], t:[]};
+let pieData = {};
+let history = [];
+let lastPosture = null;
+let accChart, gyroChart, pieChart;
+let sensitivity = {};
+let lastSensitivity = {};
+let sliderDrag = false;
+let debounceTimeout = null;
+const vibrationSet = new Set(['twisting','bend_forward_down','asymmetric_movement','quick_stand_sit']);
+function addData(chart, label, dataArr) {
+    chart.data.labels = dataArr.t;
+    chart.data.datasets[0].data = dataArr.z;
+    chart.data.datasets[1].data = dataArr.y;
+    chart.data.datasets[2].data = dataArr.x;
+    chart.update('none');
+}
+function updatePie() {
+    pieChart.data.labels = Object.keys(pieData);
+    pieChart.data.datasets[0].data = Object.values(pieData);
+    pieChart.update('none');
+}
+function updateHistoryTable() {
+    const tbody = document.getElementById('history-table').querySelector('tbody');
+    tbody.innerHTML = '';
+    history.forEach(row => {
+        tbody.innerHTML += `<tr><td>${row.date}</td><td>${row.time}</td><td>${row.pose}</td></tr>`;
+    });
+}
+function downloadHistory() {
+    let csv = 'Date,Time,Posture\n';
+    history.forEach(row => { csv += `${row.date},${row.time},${row.pose}\n`; });
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'posture_history.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+function highlightPose(pose) {
+    poses.forEach(p => {
+        const btn = document.getElementById('pose-btn-' + p);
+        if (btn) btn.classList.toggle('active', p === pose);
+    });
+}
+function renderSensitivitySliders() {
+    const row = document.getElementById('sensitivity-row');
+    // Only re-render if backend values changed
+    if (JSON.stringify(sensitivity) === JSON.stringify(lastSensitivity) && row.children.length === poses.length) return;
+    lastSensitivity = JSON.parse(JSON.stringify(sensitivity));
+    row.innerHTML = '';
+    poses.forEach(pose => {
+        const group = document.createElement('div');
+        group.className = 'sensitivity-group';
+        const label = document.createElement('label');
+        label.className = 'sensitivity-label';
+        label.textContent = pose.replace('_',' ').replace('normalspeedsit','Normal Speed Sit').replace(/\b\w/g, l => l.toUpperCase());
+        label.setAttribute('for', 'slider-' + pose);
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = 0;
+        slider.max = 1;
+        slider.step = 0.01;
+        slider.value = sensitivity[pose] || 0.5;
+        slider.className = 'sensitivity-slider';
+        slider.id = 'slider-' + pose;
+        slider.oninput = function() {
+            sliderDrag = true;
+            sensitivity[pose] = parseFloat(this.value);
+            if (debounceTimeout) clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => { sendSensitivity(); sliderDrag = false; }, 300);
+        };
+        group.appendChild(label);
+        group.appendChild(slider);
+        row.appendChild(group);
+    });
+}
+function sendSensitivity() {
+    fetch('/set_sensitivity', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(sensitivity)
+    });
+}
+function fetchLiveData() {
+    fetch('/live_data')
+        .then(r => r.json())
+        .then(data => {
+            accData = data.acc;
+            gyroData = data.gyro;
+            pieData = data.pie;
+            history = data.history;
+            // Only update sensitivity if not dragging
+            if (!sliderDrag) sensitivity = data.sensitivity;
+            const posture = data.current_posture;
+            document.getElementById('current-posture').textContent = posture || 'None';
+            highlightPose(posture);
+            addData(accChart, '', accData);
+            addData(gyroChart, '', gyroData);
+            updatePie();
+            updateHistoryTable();
+            renderSensitivitySliders();
+            // Vibration feedback for certain postures on mobile
+            if (posture && vibrationSet.has(posture) && window.navigator && 'vibrate' in window.navigator) {
+                if (/Mobi|Android/i.test(navigator.userAgent)) {
+                    window.navigator.vibrate([200, 100, 200]);
+                }
+            }
+        });
+}
+document.addEventListener('DOMContentLoaded', function() {
+    accChart = new Chart(document.getElementById('accChart').getContext('2d'), {
+        type: 'line', options: {responsive:true,animation:{duration:600},scales:{x:{display:false},y:{beginAtZero:true}}},
+        data: {labels:[], datasets:[
+            {label:'z',data:[],borderColor:'#a259f7',backgroundColor:'rgba(162,89,247,0.2)',tension:0.3},
+            {label:'y',data:[],borderColor:'#6d28d9',backgroundColor:'rgba(109,40,217,0.2)',tension:0.3},
+            {label:'x',data:[],borderColor:'#f3e8ff',backgroundColor:'rgba(243,232,255,0.2)',tension:0.3}
+        ]}
+    });
+    gyroChart = new Chart(document.getElementById('gyroChart').getContext('2d'), {
+        type: 'line', options: {responsive:true,animation:{duration:600},scales:{x:{display:false},y:{beginAtZero:true}}},
+        data: {labels:[], datasets:[
+            {label:'z',data:[],borderColor:'#a259f7',backgroundColor:'rgba(162,89,247,0.2)',tension:0.3},
+            {label:'y',data:[],borderColor:'#6d28d9',backgroundColor:'rgba(109,40,217,0.2)',tension:0.3},
+            {label:'x',data:[],borderColor:'#f3e8ff',backgroundColor:'rgba(243,232,255,0.2)',tension:0.3}
+        ]}
+    });
+    pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), {
+        type: 'pie',
+        options: {
+            responsive:true,
+            animation:{duration:800},
+            plugins: {
+                legend: { labels: { color: '#fff', font: { weight: 'bold' } } },
+                tooltip: { bodyColor: '#fff', titleColor: '#fff' }
+            }
+        },
+        data: {labels:[], datasets:[{data:[],backgroundColor:[
+            '#a259f7', // main accent
+            '#6d28d9', // deep purple
+            '#c084fc', // light purple
+            '#7c3aed', // vibrant purple
+            '#ede9fe', // lavender
+            '#a78bfa', // soft purple
+            '#8b5cf6', // medium purple
+            '#581c87', // dark purple
+            '#b794f4', // pastel purple
+            '#f3e8ff'  // very light purple
+        ]}]}
+    });
+    setInterval(fetchLiveData, 1000);
+});
+</script>
+{% endif %}
+{% endblock %} 

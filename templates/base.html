@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}PregPose Pal{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --main-bg: #2d0036;
+            --main-accent: #a259f7;
+            --main-accent2: #6d28d9;
+            --main-light: #f3e8ff;
+            --main-dark: #1a0021;
+            --main-btn: #a259f7;
+            --main-btn-hover: #6d28d9;
+        }
+        body {
+            background: linear-gradient(135deg, var(--main-bg), var(--main-accent2));
+            color: var(--main-light);
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            transition: background 0.5s;
+        }
+        header {
+            background: var(--main-dark);
+            padding: 1.5rem 0 1rem 0;
+            box-shadow: 0 4px 24px 0 rgba(162,89,247,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeInDown 1s;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .project-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--main-accent);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 8px #0002;
+            animation: popIn 1.2s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        nav {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        nav a {
+            color: var(--main-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            background: var(--main-accent2);
+            transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 8px #0001;
+        }
+        nav a:hover, nav a.active {
+            background: var(--main-btn);
+            color: #fff;
+            box-shadow: 0 4px 16px #a259f7aa;
+        }
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: rgba(44,0,54,0.85);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 #a259f733;
+            padding: 2.5rem 2rem 2rem 2rem;
+            animation: fadeIn 1.2s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .btn {
+            background: var(--main-btn);
+            color: #fff;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.7rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #a259f755;
+            transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+        }
+        .btn:hover {
+            background: var(--main-btn-hover);
+            box-shadow: 0 4px 16px #a259f7aa;
+            transform: translateY(-2px) scale(1.04);
+        }
+        .highlight {
+            background: var(--main-accent);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 2px 12px #a259f7cc;
+            border: 2px solid #fff2;
+        }
+        .label-btn {
+            margin: 0.2rem 0.5rem 0.2rem 0;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            border: none;
+            background: var(--main-accent2);
+            color: var(--main-light);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+        }
+        .label-btn.active {
+            background: var(--main-accent);
+            color: #fff;
+            box-shadow: 0 2px 12px #a259f7cc;
+        }
+        .card {
+            background: rgba(255,255,255,0.07);
+            border-radius: 1rem;
+            box-shadow: 0 2px 12px #a259f733;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 1.2s;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .center {
+            text-align: center;
+        }
+        .mt-2 { margin-top: 2rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .w-100 { width: 100%; }
+        .chart-container {
+            background: rgba(255,255,255,0.08);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 12px #a259f733;
+        }
+        .download-btn {
+            background: var(--main-accent2);
+            color: #fff;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.5rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        .download-btn:hover {
+            background: var(--main-accent);
+            box-shadow: 0 2px 12px #a259f7cc;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div style="display:flex;align-items:center;justify-content:space-between;position:relative;width:100%;padding-left:2rem;">
+            <div class="project-title">PregPose Pal</div>
+            <a href="/home" style="margin-right:2rem;">
+                <img src="{{ url_for('static', filename='icon.png') }}" alt="PregPose Pal Icon" style="height:48px;width:48px;border-radius:16px;box-shadow:0 2px 8px #a259f755;">
+            </a>
+        </div>
+        <nav style="display:flex;justify-content:center;gap:2rem;margin-bottom:0.5rem;">
+            <a href="/home" {% if request.path == '/home' %}class="active"{% endif %}>Record</a>
+            <a href="/train" {% if request.path == '/train' %}class="active"{% endif %}>Train</a>
+            <a href="/live" {% if request.path == '/live' %}class="active"{% endif %}>Live Detection</a>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html> 

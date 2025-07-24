@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}PregPose Pal - Train Model{% endblock %}
+{% block content %}
+<h1 class="center mb-2">Train a Pose Model</h1>
+<form method="post" class="center mb-2 card">
+    <label for="model_name">Model Name:</label>
+    <input type="text" name="model_name" id="model_name" required style="margin:0 1rem; padding:0.5rem 1rem; border-radius:1rem; border:none;">
+    <button type="submit" class="btn">Train Model</button>
+</form>
+{% if error %}
+<p class="center" style="color:#ffb3ec; font-weight:600;">{{ error }}</p>
+{% endif %}
+{% if trained %}
+<div class="center card">
+    <p>Model training complete!</p>
+    {% if model_name %}
+    <p>Model saved as: <b>{{ model_name }}</b></p>
+    {% endif %}
+    {% if accuracy %}
+    <p>Validation Accuracy: <span class="highlight">{{ accuracy }}</span></p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %} 

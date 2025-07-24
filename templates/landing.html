@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}PregPose Pal - Welcome{% endblock %}
+{% block content %}
+<div class="center">
+    <h1 style="font-size:2.8rem; margin-bottom:0.5rem;">Welcome to <span style="color:var(--main-accent);">PregPose Pal</span></h1>
+    <p style="font-size:1.3rem; max-width:700px; margin:1.5rem auto 2.5rem auto; line-height:1.7;">
+        <b>PregPose Pal</b> is your smart companion for safe movement and posture tracking during pregnancy. Effortlessly record, train, and detect your body poses in real time using your mobile sensors. Visualize your movements, get instant feedback, and keep a history of your posture changes—all in a beautiful, modern interface.
+    </p>
+    <div style="max-width:700px;margin:2rem auto 2.5rem auto;">
+        <ul style="list-style:none;padding:0;font-size:1.15rem;line-height:2;">
+            <li style="margin-bottom:1rem;"><span style="font-size:1.5rem;color:var(--main-accent);margin-right:0.7rem;">📱</span>Record your own movement data for different postures using your phone’s sensors.</li>
+            <li style="margin-bottom:1rem;"><span style="font-size:1.5rem;color:var(--main-accent);margin-right:0.7rem;">🤖</span>Train custom ML models to recognize safe and unsafe postures, tailored to your own body and habits.</li>
+            <li style="margin-bottom:1rem;"><span style="font-size:1.5rem;color:var(--main-accent);margin-right:0.7rem;">🔔</span>Get live feedback — including visual cues and phone vibrations — whenever risky movements like twisting, bending, or quick standing are detected.</li>
+            <li style="margin-bottom:1rem;"><span style="font-size:1.5rem;color:var(--main-accent);margin-right:0.7rem;">📊</span>Visualize your activity with beautiful, animated dashboards and keep a downloadable history for yourself or your doctor.</li>
+        </ul>
+        <div style="font-size:1.1rem;color:var(--main-light);margin-top:2rem;">
+            <b>Our platform is fully web-based, works on any device, and is designed with a modern, accessible, and friendly interface.</b>
+        </div>
+    </div>
+    <a href="/home" class="btn" style="font-size:1.3rem;">Get Started</a>
+</div>
+{% endblock %} 

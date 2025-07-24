@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}PregPose Pal - Record Data{% endblock %}
+{% block content %}
+<div class="center" style="margin-bottom:2rem;">
+    <img src="{{ url_for('static', filename='icon.png') }}" alt="PregPose Pal Icon" style="height:120px;width:120px;border-radius:32px;box-shadow:0 4px 24px #a259f755;">
+</div>
+<div class="card mb-2" style="max-width:600px; margin:0 auto; display:flex; flex-direction:column; align-items:center; padding:2.5rem 2rem;">
+    <h1 class="mb-1 center">Record Pose Data</h1>
+    <p class="mb-2 center" style="font-size:1.1rem; color:var(--main-light);">
+        <b>Instructions:</b><br>
+        1. On your <b>mobile</b>, download the <b>Sensor Logger</b> app.<br>
+        2. Turn on <b>Gyroscope</b> and <b>Accelerometer</b>.<br>
+        3. Go to <b>Settings &gt; Data Streaming</b>.<br>
+        4. Turn on <b>HTTP Push</b>.<br>
+        5. In the <b>Push URL</b>, enter: <span class="highlight" style="font-size:1.1rem;">http://&lt;your-laptop-ip&gt;:5000/sensor</span><br>
+        (Replace <i>&lt;your-laptop-ip&gt;</i> with your laptop's IP address on the same network.)
+    </p>
+    {% if recording %}
+    <div style="margin-bottom:1.5rem; width:100%; display:flex; flex-direction:column; align-items:center;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:1rem;">
+            <div class="highlight" style="font-size:1.3rem; padding:0.5rem 1.5rem; border-radius:2rem;">Recording: {{ selected_pose.replace('_', ' ').title() }}</div>
+            <div class="lds-dual-ring"></div>
+        </div>
+        <form action="/stop_recording" method="post" class="center mt-2" style="width:100%;display:flex;justify-content:center;">
+            <button type="submit" class="btn">Stop Recording</button>
+        </form>
+    </div>
+    {% else %}
+    <form action="/record" method="post" class="center mb-2" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+        <label for="pose">Select Pose:</label>
+        <select name="pose" id="pose" required style="margin:0 1rem; padding:0.5rem 1rem; border-radius:1rem; border:none;" onchange="updatePoseInfo()">
+            {% for pose in poses %}
+            <option value="{{ pose }}">{{ pose.replace('_', ' ').title() }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn" style="margin-top:1rem;">Start Recording</button>
+    </form>
+    <div id="pose-info" class="center mt-2" style="min-height:220px; width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+    {% endif %}
+    <form action="/reset_data" method="post" class="center mt-2" style="width:100%;display:flex;justify-content:center;">
+        <button type="submit" class="btn" style="background:var(--main-accent2);">Reset All Data</button>
+    </form>
+</div>
+<style>
+.lds-dual-ring {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+  border-radius: 50%;
+  border: 4px solid var(--main-accent);
+  border-color: var(--main-accent) transparent var(--main-accent2) transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+<script>
+const poseDescriptions = {
+    'bend_forward_down': 'Bend forward at the waist, keeping your back straight. This pose simulates picking something up from the ground.',
+    'twisting': 'Twist your upper body left and right, as if looking over your shoulder.',
+    'quick_stand_sit': 'Quickly stand up from a sitting position, or sit down quickly from standing.',
+    'normal_sit': 'Sit upright in a chair with both feet flat on the floor.',
+    'normal_stand': 'Stand upright with a relaxed posture, feet shoulder-width apart.',
+    'normal_walk': 'Walk at a normal pace in a straight line.',
+    'asymmetric_movement': 'Move one side of your body more than the other, simulating imbalance.',
+    'normalspeedsit': 'Sit down at a normal, comfortable speed (not too fast or slow).'
+};
+const poseImages = {
+    'bend_forward_down': 'bend_forward.png',
+    'twisting': 'twist.png',
+    'quick_stand_sit': 'stand.png',
+    'normal_sit': 'sit.png',
+    'normal_stand': 'stand.png',
+    'normal_walk': 'walk.png',
+    'asymmetric_movement': 'imbalanced_walk.png',
+    'normalspeedsit': 'sit.png'
+};
+function updatePoseInfo() {
+    const select = document.getElementById('pose');
+    const pose = select.value;
+    const infoDiv = document.getElementById('pose-info');
+    if (pose in poseImages) {
+        infoDiv.innerHTML = `<img src='${window.location.origin}/static/${poseImages[pose]}' alt='${pose}' style='height:140px;width:auto;margin-bottom:1rem;border-radius:1rem;box-shadow:0 2px 12px #a259f7cc;'><div style='font-size:1.1rem;color:var(--main-light);margin-bottom:0.5rem;'>${poseDescriptions[pose]}</div>`;
+    } else {
+        infoDiv.innerHTML = '';
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('pose')) updatePoseInfo();
+});
+</script>
+{% endblock %} 
