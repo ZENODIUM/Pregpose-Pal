@@ -1,5 +1,5 @@
 # PregPose Pal
-<img src="https://github.com/user-attachments/assets/06b6c220-b9c4-40a2-a8e5-3bad8c45562b" width="300">
+![WhatsApp Image 2025-07-24 at 23 30 09_a0ee4a6e](https://github.com/user-attachments/assets/06b6c220-b9c4-40a2-a8e5-3bad8c45562b)
 
 
 ## Overview
