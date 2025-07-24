@@ -65,7 +65,8 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
 
 
 ### Sensor Logger Config
-![WhatsApp Image 2025-07-24 at 23 17 44_7133b05b](https://github.com/user-attachments/assets/6a894ba3-1f92-4215-a271-feaf537656e1)
+<img src="https://github.com/user-attachments/assets/6a894ba3-1f92-4215-a271-feaf537656e1" width="300">
+
 
 ### 2. **Training a Model**
 ![WhatsApp Image 2025-07-24 at 23 28 44_17a83485](https://github.com/user-attachments/assets/2cb7f4f4-fe3d-45ac-b56b-11e31f114c8f)
@@ -91,7 +92,8 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
 - You can adjust sensitivity for each posture class in real time.
 
 ### Sensor Logger Config
-![WhatsApp Image 2025-07-24 at 22 13 02_1e8995d4](https://github.com/user-attachments/assets/35ee09f3-f988-4d97-a453-f697b79b6e1d)
+<img src="https://github.com/user-attachments/assets/35ee09f3-f988-4d97-a453-f697b79b6e1d" width="300">
+
 
 
 ## Pages Explained
