@@ -17,8 +17,10 @@ Falls and unsafe postures are a significant risk during pregnancy, potentially l
 - **Sensor Logger App**: Third-party mobile app for streaming accelerometer and gyroscope data to the server
 
 ## Sensor logger app and configuration
-![WhatsApp Image 2025-07-24 at 22 11 54_e06ef0da](https://github.com/user-attachments/assets/bdc1ce51-1ce3-498a-8da6-d670cc572fe5)
-![WhatsApp Image 2025-07-24 at 22 12 04_eb8b1386](https://github.com/user-attachments/assets/40208c70-27b7-4a80-9480-daa1ec149275)
+<div style="display: flex; gap: 10px;">
+  <img src="https://github.com/user-attachments/assets/bdc1ce51-1ce3-498a-8da6-d670cc572fe5" width="300">
+  <img src="https://github.com/user-attachments/assets/40208c70-27b7-4a80-9480-daa1ec149275" width="300">
+</div>
 
 
 
